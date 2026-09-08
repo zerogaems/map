@@ -3,7 +3,7 @@ from telebot import TeleBot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # جلب التوكن من متغيرات البيئة (Environment Variables) في Render أو وضعه مباشرة
-BOT_TOKEN = os.environ.get("8036903555:AAGroUTxYo2dghkMf-_ifFTxjlDauC2nLv4", "ضع_التوكن_الخاص_بك_هنا")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8036903555:AAGroUTxYo2dghkMf-_ifFTxjlDauC2nLv4")
 WEB_APP_URL = "https://zerogaems.github.io/map/"  # رابط موقعك الـ HTML الجاهز
 
 bot = TeleBot(BOT_TOKEN)
