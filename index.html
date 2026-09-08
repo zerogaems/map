@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>دليل الكليات والقاعات الكامل</title>
+  <title>دليل الكليات الاحترافي</title>
 
-  <!-- 1. مكتبة تلغرام -->
+  <!-- Telegram Web App JS -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- 2. مكتبة Leaflet للخرائط الخارجية -->
+  <!-- Leaflet Map JS & CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -35,7 +35,7 @@
     .controls-panel {
       position: absolute; bottom: 10px; left: 10px; right: 10px;
       background-color: #1e293b; color: #ffffff; padding: 10px; border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1px solid #334155; z-index: 1000; display: flex; flex-direction: column; gap: 6px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #334155; z-index: 1000; display: flex; flex-direction: column; gap: 6px;
     }
 
     .dropdown-group { display: flex; gap: 4px; }
@@ -114,7 +114,6 @@
     const northEast = L.latLng(35.52780824158785, 35.81065192458042);
     const campusBounds = L.latLngBounds(southWest, northEast);
 
-    // قاعدة بيانات الكليات والأماكن
     const campusData = {
       main: { name: "المدخل الرئيسي للجامعة", lat: 35.52601940733772, lng: 35.806881711117235 },
       twasaa: {
@@ -140,9 +139,6 @@
       }
     };
 
-    /* -------------------------------------------------------------
-       1. الخريطة الخارجية (LEAFLET)
-    ------------------------------------------------------------- */
     function initOutdoorMap() {
       map = L.map('outdoor-map', { maxBounds: campusBounds, minZoom: 16, maxZoom: 19 }).setView([campusData.main.lat, campusData.main.lng], 17);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
@@ -218,7 +214,7 @@
     }
 
     /* -------------------------------------------------------------
-       2. المخططات البرمجية والتفاعلية للكليات (CANVAS MAPS)
+       2. المخططات البرمجية الرسم والتنقل الحقيقي عبر الممرات
     ------------------------------------------------------------- */
     let animationFrameId, avatarProgress = 0, isNavigating = false, currentPath = [];
     let isCrossFloorJourney = false, targetRoomGlobal = "";
@@ -280,7 +276,7 @@
       drawAvatarAndPath(ctx, entrance, avatarPos);
     }
 
-    // 2. كلية العلوم
+    // 2. كلية العلوم (تفاصيل كاملة ومطابقة 100%)
     function drawUloom(ctx, w, h, selectedRoom, avatarPos) {
       const entrance = { x: w * 0.30, y: h * 0.65 };
       ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06; ctx.lineCap = 'round';
@@ -290,20 +286,35 @@
       ctx.beginPath(); ctx.strokeRect(w*0.30, h*0.25, w*0.35, h*0.10);
       ctx.beginPath(); ctx.moveTo(w*0.65, h*0.25); ctx.lineTo(w*0.72, h*0.25); ctx.lineTo(w*0.72, h*0.08); ctx.stroke();
 
+      // المعالم الخدمية
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1;
+      ctx.fillRect(w*0.56, h*0.58, 55, 18); ctx.strokeRect(w*0.56, h*0.58, 55, 18);
+      ctx.fillStyle = '#94a3b8'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('تصوير 🖨️', w*0.56+27, h*0.58+12);
+
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(w*0.56, h*0.52); ctx.lineTo(w*0.72, h*0.52); ctx.stroke();
+
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#64748b'; ctx.fillRect(w*0.56, h*0.46, 45, 18); ctx.strokeRect(w*0.56, h*0.46, 45, 18);
+      ctx.fillStyle = '#94a3b8'; ctx.fillText('كافيه ☕', w*0.56+22, h*0.46+12);
+
       drawStair(ctx, w*0.48, h*0.40, 20, 12, 'درج 1');
       drawStair(ctx, w*0.48, h*0.31, 20, 12, 'درج 2');
-      drawStair(ctx, w*0.70, h*0.21, 14, 18, 'درج 3');
+
+      ctx.fillStyle = '#0284c7'; ctx.fillRect(w*0.32, h*0.22, 28, 14);
+      ctx.fillStyle = '#ffffff'; ctx.font = '7px sans-serif'; ctx.fillText('🚹', w*0.32+14, h*0.22+10);
+      ctx.fillStyle = '#ec4899'; ctx.fillRect(w*0.50, h*0.22, 28, 14);
+      ctx.fillStyle = '#ffffff'; ctx.fillText('🚺', w*0.50+14, h*0.22+10);
+
+      drawStair(ctx, w*0.70, h*0.18, 14, 18, 'درج 3');
 
       let isT = (selectedRoom === "المدرج الرابع");
       ctx.fillStyle = isT ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = isT ? '#38bdf8' : '#475569';
-      ctx.fillRect(w*0.45, h*0.10, 80, 28); ctx.strokeRect(w*0.45, h*0.10, 80, 28);
-      ctx.fillStyle = isT ? '#38bdf8' : '#94a3b8'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('المدرج الرابع 🎯', w*0.45+40, h*0.10+18);
+      ctx.fillRect(w*0.45, h*0.08, 80, 28); ctx.strokeRect(w*0.45, h*0.08, 80, 28);
+      ctx.fillStyle = isT ? '#38bdf8' : '#94a3b8'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('المدرج الرابع 🎯', w*0.45+40, h*0.08+18);
 
       drawAvatarAndPath(ctx, entrance, avatarPos);
     }
 
-    // 3. كلية الآداب (الأرضي والقبو)
+    // 3. كلية الآداب (الأرضي والقبو المطابق 100%)
     function drawAdab(ctx, w, h, fKey, selectedRoom, avatarPos) {
       if (fKey === 'ground') {
         const entrance = { x: w * 0.50, y: h * 0.68 };
@@ -322,21 +333,29 @@
 
         drawAvatarAndPath(ctx, entrance, avatarPos);
       } else {
-        const stairPos = { x: w * 0.50, y: h * 0.85 };
+        const stairPos = { x: w * 0.50, y: h * 0.82 };
         ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(stairPos.x, stairPos.y); ctx.lineTo(stairPos.x, h*0.35); ctx.lineTo(w*0.55, h*0.35); ctx.stroke();
-        ctx.beginPath(); ctx.strokeRect(w*0.55, h*0.20, w*0.35, h*0.35);
+        ctx.beginPath(); ctx.moveTo(stairPos.x, stairPos.y); ctx.lineTo(stairPos.x, h*0.45); ctx.lineTo(w*0.68, h*0.45); ctx.stroke();
+        ctx.beginPath(); ctx.strokeRect(w*0.68, h*0.20, w*0.24, h*0.38);
+
+        ctx.fillStyle = '#14532d'; ctx.strokeStyle = '#22c55e'; ctx.fillRect(w*0.72, h*0.26, w*0.16, h*0.22);
+        ctx.fillStyle = '#86efac'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('حديقة 🌿', w*0.80, h*0.37);
 
         let q1 = (selectedRoom === "ق1"), q2 = (selectedRoom === "ق2");
-        ctx.fillStyle = q1 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.62, h*0.52, 50, 22);
-        ctx.fillStyle = q2 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.84, h*0.22, 22, 45);
+        ctx.fillStyle = q1 ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = q1 ? '#38bdf8' : '#475569';
+        ctx.fillRect(w*0.70, h*0.58, 45, 20); ctx.strokeRect(w*0.70, h*0.58, 45, 20);
+        ctx.fillStyle = q1 ? '#38bdf8' : '#94a3b8'; ctx.fillText('ق1 🎯', w*0.70+22, h*0.58+14);
+
+        ctx.fillStyle = q2 ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = q2 ? '#38bdf8' : '#475569';
+        ctx.fillRect(w*0.88, h*0.28, 20, 40); ctx.strokeRect(w*0.88, h*0.28, 20, 40);
+        ctx.fillStyle = q2 ? '#38bdf8' : '#94a3b8'; ctx.fillText('ق2 🎯', w*0.88+10, h*0.28+22);
 
         ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(stairPos.x, stairPos.y, 8, 0, Math.PI*2); ctx.fill();
         drawAvatarAndPath(ctx, stairPos, avatarPos);
       }
     }
 
-    // 4. كلية الهمك (أفقي)
+    // 4. كلية الهمك (أفقي بالكامل مع كامل المعالم)
     function drawHamak(ctx, w, h, selectedRoom, avatarPos) {
       const entrance = { x: w * 0.08, y: h * 0.35 };
       ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.05; ctx.lineCap = 'round';
@@ -382,7 +401,7 @@
     }
 
     /* -------------------------------------------------------------
-       3. خوارزميات التوجيه والتحريك الذكي
+       3. خوارزمية التوجيه وعدم اختراق الجدران (Strict Waypoints)
     ------------------------------------------------------------- */
     function startIndoorNavigation() {
       const bKey = document.getElementById('building-select-indoor').value;
@@ -393,7 +412,7 @@
 
       targetRoomGlobal = selectedRoom;
 
-      // حالة الربط التلقائي للآداب (من الأرضي إلى القبو)
+      // الربط بين الطوابق للآداب
       if (bKey === 'adab' && floor === 'ground' && (selectedRoom === "ق1" || selectedRoom === "ق2")) {
         isCrossFloorJourney = true;
         currentPath = [{ x: w * 0.50, y: h * 0.68 }, { x: w * 0.58, y: h * 0.64 }, { x: w * 0.58, y: h * 0.08 }];
@@ -404,26 +423,47 @@
 
       isCrossFloorJourney = false;
 
-      // المسارات العادية
+      // 1. التوسع (الدوران حول الحديقة دون اختراق)
       if (bKey === 'twasaa') {
         const ent = { x: w * 0.50, y: h * 0.65 };
-        if (selectedRoom === "مدرج 1") currentPath = [ent, { x: w*0.5, y: h*0.52 }, { x: w*0.88, y: h*0.52 }];
-        else if (selectedRoom === "مدرج 2") currentPath = [ent, { x: w*0.5, y: h*0.38 }, { x: w*0.88, y: h*0.38 }];
-        else if (selectedRoom === "مدرج 3") currentPath = [ent, { x: w*0.5, y: h*0.24 }, { x: w*0.72, y: h*0.24 }];
-        else if (selectedRoom === "مدرج 4") currentPath = [ent, { x: w*0.5, y: h*0.12 }, { x: w*0.72, y: h*0.12 }];
-      } else if (bKey === 'uloom') {
-        currentPath = [{ x: w * 0.30, y: h * 0.65 }, { x: w * 0.50, y: h * 0.62 }, { x: w * 0.50, y: h * 0.25 }, { x: w * 0.72, y: h * 0.25 }, { x: w * 0.72, y: h * 0.10 }, { x: w * 0.55, y: h * 0.10 }];
-      } else if (bKey === 'adab') {
+        const bJunc = { x: w * 0.50, y: h * 0.58 };
+        const rBtm = { x: w * 0.78, y: h * 0.58 };
+        const rTop = { x: w * 0.78, y: h * 0.32 };
+        const nJunc = { x: w * 0.50, y: h * 0.32 };
+
+        if (selectedRoom === "مدرج 1") currentPath = [ent, bJunc, rBtm, { x: w*0.78, y: h*0.52 }, { x: w*0.88, y: h*0.52 }];
+        else if (selectedRoom === "مدرج 2") currentPath = [ent, bJunc, rBtm, { x: w*0.78, y: h*0.38 }, { x: w*0.88, y: h*0.38 }];
+        else if (selectedRoom === "مدرج 3") currentPath = [ent, bJunc, rBtm, rTop, nJunc, { x: w*0.50, y: h*0.24 }, { x: w*0.72, y: h*0.24 }];
+        else if (selectedRoom === "مدرج 4") currentPath = [ent, bJunc, rBtm, rTop, nJunc, { x: w*0.50, y: h*0.12 }, { x: w*0.72, y: h*0.12 }];
+      } 
+      // 2. العلوم (الدوران بالمسار الحقيقي)
+      else if (bKey === 'uloom') {
+        currentPath = [
+          { x: w * 0.30, y: h * 0.65 },
+          { x: w * 0.30, y: h * 0.62 },
+          { x: w * 0.50, y: h * 0.62 },
+          { x: w * 0.50, y: h * 0.35 },
+          { x: w * 0.65, y: h * 0.35 },
+          { x: w * 0.65, y: h * 0.25 },
+          { x: w * 0.72, y: h * 0.25 },
+          { x: w * 0.72, y: h * 0.08 },
+          { x: w * 0.45, y: h * 0.08 }
+        ];
+      } 
+      // 3. الآداب (الأرضي والقبو)
+      else if (bKey === 'adab') {
         if (floor === 'ground') {
           const ent = { x: w * 0.50, y: h * 0.68 };
           if (selectedRoom === "مدرج 1") currentPath = [ent, { x: w*0.58, y: h*0.64 }, { x: w*0.58, y: h*0.44 }, { x: w*0.70, y: h*0.44 }];
-          else currentPath = [ent, { x: w*0.58, y: h*0.64 }, { x: w*0.32, y: h*0.64 }, { x: w*0.32, y: h*0.38 }, { x: w*0.22, y: h*0.38 }];
+          else currentPath = [ent, { x: w*0.58, y: h*0.64 }, { x: w*0.32, y: h*0.64 }, { x: w*0.32, y: h*0.38 }, { x: w*0.18, y: h*0.38 }];
         } else {
-          const stair = { x: w * 0.50, y: h * 0.85 };
-          if (selectedRoom === "ق1") currentPath = [stair, { x: stair.x, y: h*0.35 }, { x: w*0.55, y: h*0.35 }, { x: w*0.72, y: h*0.52 }];
-          else currentPath = [stair, { x: stair.x, y: h*0.35 }, { x: w*0.90, y: h*0.35 }, { x: w*0.90, y: h*0.22 }];
+          const stair = { x: w * 0.50, y: h * 0.82 };
+          if (selectedRoom === "ق1") currentPath = [stair, { x: stair.x, y: h*0.45 }, { x: w*0.68, y: h*0.45 }, { x: w*0.68, y: h*0.58 }, { x: w*0.70, y: h*0.58 }];
+          else currentPath = [stair, { x: stair.x, y: h*0.45 }, { x: w*0.68, y: h*0.45 }, { x: w*0.68, y: h*0.58 }, { x: w*0.88, y: h*0.58 }, { x: w*0.88, y: h*0.28 }];
         }
-      } else if (bKey === 'hamak') {
+      } 
+      // 4. الهمك (المسار الأفقي الصريح)
+      else if (bKey === 'hamak') {
         const ent = { x: w * 0.08, y: h * 0.35 };
         if (selectedRoom === "بي 1") currentPath = [ent, { x: w*0.28, y: h*0.35 }, { x: w*0.68, y: h*0.35 }, { x: w*0.68, y: h*0.20 }, { x: w*0.62, y: h*0.20 }];
         else if (selectedRoom === "بي 2") currentPath = [ent, { x: w*0.28, y: h*0.35 }, { x: w*0.68, y: h*0.35 }, { x: w*0.68, y: h*0.28 }, { x: w*0.62, y: h*0.28 }];
@@ -446,10 +486,10 @@
 
         const canvas = document.getElementById('indoor-canvas');
         const w = canvas.width, h = canvas.height;
-        const stair = { x: w * 0.50, y: h * 0.85 };
+        const stair = { x: w * 0.50, y: h * 0.82 };
 
-        if (targetRoomGlobal === "ق1") currentPath = [stair, { x: stair.x, y: h*0.35 }, { x: w*0.55, y: h*0.35 }, { x: w*0.72, y: h*0.52 }];
-        else currentPath = [stair, { x: stair.x, y: h*0.35 }, { x: w*0.90, y: h*0.35 }, { x: w*0.90, y: h*0.22 }];
+        if (targetRoomGlobal === "ق1") currentPath = [stair, { x: stair.x, y: h*0.45 }, { x: w*0.68, y: h*0.45 }, { x: w*0.68, y: h*0.58 }, { x: w*0.70, y: h*0.58 }];
+        else currentPath = [stair, { x: stair.x, y: h*0.45 }, { x: w*0.68, y: h*0.45 }, { x: w*0.68, y: h*0.58 }, { x: w*0.88, y: h*0.58 }, { x: w*0.88, y: h*0.28 }];
 
         avatarProgress = 0; animate();
         return;
