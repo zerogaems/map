@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>دليل الكلية والجامعة</title>
+  <title>دليل الكليات والقاعات</title>
 
-  <!-- 1. مكتبة تلغرام المباشرة -->
+  <!-- 1. مكتبة تلغرام -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- 2. مكتبة Leaflet للخرائط (CSS + JS) -->
+  <!-- 2. مكتبة Leaflet للخرائط -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -99,15 +99,20 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.15);
       z-index: 1000;
       display: flex;
-      gap: 10px;
-      align-items: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dropdown-group {
+      display: flex;
+      gap: 8px;
     }
 
     select, button.action-btn {
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      font-size: 13px;
       background-color: var(--secondary-bg);
       color: var(--text-color);
     }
@@ -131,29 +136,48 @@
 </head>
 <body>
 
+  <!-- شريط التنقل العلوي -->
   <div class="top-nav">
     <button id="btn-outdoor" class="nav-btn active" onclick="switchView('outdoor')">الخارجية (الجامعة)</button>
     <button id="btn-indoor" class="nav-btn" onclick="switchView('indoor')">الداخلية (الكلية)</button>
   </div>
 
+  <!-- الخريطة الخارجية -->
   <div id="outdoor-container" class="map-container">
     <div id="outdoor-map"></div>
     <div class="controls-panel">
-      <button class="action-btn" onclick="locateUser()" style="width: 100%;">📍 حدد موقعي الحالي</button>
+      <div class="dropdown-group">
+        <select id="building-select-outdoor" onchange="focusBuildingOnMap(this.value)">
+          <option value="main">🚪 المدخل الرئيسي للجامعة</option>
+          <option value="hamak">1. كلية الهمك</option>
+          <option value="twasaa">2. مبنى التوسع</option>
+          <option value="adab">3. كلية الآداب</option>
+          <option value="uloom">4. كلية العلوم</option>
+        </select>
+      </div>
+      <button class="action-btn" onclick="locateUser()">📍 حدد موقعي الحالي</button>
     </div>
   </div>
 
+  <!-- المخطط الداخلي والتنقل بين المباني والقاعات -->
   <div id="indoor-container" class="map-container" style="display: none;">
     <canvas id="indoor-canvas"></canvas>
     
     <div class="controls-panel">
-      <select id="destination-select">
-        <option value="">اختر القاعة أو الهدف...</option>
-        <option value="hall1">مدرج 1</option>
-        <option value="lab_telecom">مخبر الاتصالات</option>
-        <option value="dean_office">عمادة الكلية</option>
-      </select>
-      <button class="action-btn" onclick="startIndoorNavigation()">انطلق 🚶‍♂️</button>
+      <div class="dropdown-group">
+        <select id="building-select-indoor" onchange="syncAndChangeBuilding(this.value)">
+          <option value="hamak">1. كلية الهمك</option>
+          <option value="twasaa">2. مبنى التوسع</option>
+          <option value="adab">3. كلية الآداب</option>
+          <option value="uloom">4. كلية العلوم</option>
+        </select>
+
+        <select id="room-select">
+          <!-- يتحدث أوتوماتيكياً -->
+        </select>
+      </div>
+
+      <button class="action-btn" onclick="startNavigation()">انطلق نحو القاعة 🚶‍♂️</button>
     </div>
   </div>
 
@@ -164,24 +188,74 @@
 
     let map;
     let userMarker;
+    let buildingMarkers = {};
 
-    // الإحداثيات الخاصة بمدخل الكلية
-    const collegeLat = 35.52601940733772; 
-    const collegeLng = 35.806881711117235;
+    // إحداثيات المدخل الرئيسي والمباني الأربعة
+    const campusData = {
+      main: {
+        name: "المدخل الرئيسي للجامعة",
+        lat: 35.52601940733772,
+        lng: 35.806881711117235
+      },
+      hamak: {
+        name: "كلية الهمك",
+        lat: 35.524735104049554,
+        lng: 35.80832173303512,
+        rooms: ["21م", "22م", "23م", "21ك", "22ك", "23ك", "44ك"]
+      },
+      twasaa: {
+        name: "مبنى التوسع",
+        lat: 35.52309984997797,
+        lng: 35.809953816186045,
+        rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"]
+      },
+      adab: {
+        name: "كلية الآداب",
+        lat: 35.52142722934893,
+        lng: 35.808531572615784,
+        rooms: ["مدرج 1", "مدرج 2", "ق1", "ق2"]
+      },
+      uloom: {
+        name: "كلية العلوم",
+        lat: 35.523082390509956,
+        lng: 35.805570862320266,
+        rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"]
+      }
+    };
 
     function initOutdoorMap() {
-      // التمركز حول الكلية بمستوى زوم دقيق (17)
-      map = L.map('outdoor-map').setView([collegeLat, collegeLng], 17);
+      // التمركز الأولي عند المدخل الرئيسي
+      map = L.map('outdoor-map').setView([campusData.main.lat, campusData.main.lng], 16);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      // وضع دبوس في الموقع المكتشف
-      L.marker([collegeLat, collegeLng]).addTo(map)
-        .bindPopup('<b>موقع الكلية الرئيسي 🏫</b>')
-        .openPopup();
+      // إضافة دبابيس لكافة المباني على الخريطة
+      Object.keys(campusData).forEach(key => {
+        const item = campusData[key];
+        const marker = L.marker([item.lat, item.lng]).addTo(map)
+          .bindPopup(`<b>${item.name}</b>`);
+        buildingMarkers[key] = marker;
+      });
+
+      // فتح نافذة المدخل الرئيسي أوتوماتيكياً
+      buildingMarkers['main'].openPopup();
+    }
+
+    function focusBuildingOnMap(key) {
+      if (campusData[key]) {
+        const target = campusData[key];
+        map.flyTo([target.lat, target.lng], 18, { animate: true, duration: 1 });
+        buildingMarkers[key].openPopup();
+      }
+    }
+
+    function syncAndChangeBuilding(key) {
+      document.getElementById('building-select-outdoor').value = key;
+      focusBuildingOnMap(key);
+      updateRooms();
     }
 
     function locateUser() {
@@ -202,6 +276,26 @@
       }
     }
 
+    function updateRooms() {
+      const buildingSelect = document.getElementById('building-select-indoor');
+      const roomSelect = document.getElementById('room-select');
+      const selectedBuilding = buildingSelect.value;
+
+      roomSelect.innerHTML = '';
+
+      if (campusData[selectedBuilding] && campusData[selectedBuilding].rooms) {
+        const rooms = campusData[selectedBuilding].rooms;
+        rooms.forEach(room => {
+          const option = document.createElement('option');
+          option.value = room;
+          option.textContent = room;
+          roomSelect.appendChild(option);
+        });
+      }
+
+      drawIndoorMap();
+    }
+
     function switchView(view) {
       const outdoorContainer = document.getElementById('outdoor-container');
       const indoorContainer = document.getElementById('indoor-container');
@@ -219,28 +313,40 @@
         indoorContainer.style.display = 'block';
         btnIndoor.classList.add('active');
         btnOutdoor.classList.remove('active');
-        drawIndoorMap();
+        updateRooms();
       }
     }
 
     function drawIndoorMap() {
       const canvas = document.getElementById('indoor-canvas');
       const ctx = canvas.getContext('2d');
+      const buildingSelect = document.getElementById('building-select-indoor');
+      const buildingName = campusData[buildingSelect.value].name;
 
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
 
-      ctx.fillStyle = '#eef2f5';
+      ctx.fillStyle = '#f8f9fa';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 150);
+      ctx.strokeStyle = '#2481cc';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(30, 40, canvas.width - 60, canvas.height - 140);
+
+      ctx.fillStyle = '#222';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`مخطط: ${buildingName}`, canvas.width / 2, 80);
 
       ctx.fillStyle = '#666';
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('مخطط الكلية الداخلي (سيتم وضع رسم الطبقات هنا)', canvas.width / 2, canvas.height / 2);
+      ctx.font = '14px sans-serif';
+      ctx.fillText('اختر القاعة واضغط انطلق لعرض المسار التفاعلي', canvas.width / 2, 110);
+    }
+
+    function startNavigation() {
+      const room = document.getElementById('room-select').value;
+      const buildingName = campusData[document.getElementById('building-select-indoor').value].name;
+      alert(`جاري توجيهك إلى [${room}] في [${buildingName}]`);
     }
 
     window.onload = function() {
