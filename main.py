@@ -31,12 +31,12 @@ def send_welcome(message):
     # 2. زر التواصل مع المطور
     developer_btn = InlineKeyboardButton(
         text="💬 تواصل مع ممثل الدفعة / المطور", 
-        url="https://t.me/YourUsername"
+        url="https://t.me/Y0USSEF_SABRA"
     )
 
     # 3. زر قنوات الدفعة
     channels_btn = InlineKeyboardButton(
-        text="📢 قنوات ومجموعات الدفعة", 
+        text="📢 بوت الانضمام لقنوات سنتك", 
         url="https://t.me/YourChannelLink"
     )
 
