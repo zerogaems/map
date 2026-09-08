@@ -155,7 +155,7 @@
           <option value="uloom">4. كلية العلوم</option>
         </select>
       </div>
-      <button class="action-btn" onclick="locateUser()">📍 حدد موقعي الحالي</button>
+      <button class="action-btn" onclick="locateUser()">📍 حدد موقعي وارسم المسار</button>
     </div>
   </div>
 
@@ -189,6 +189,13 @@
     let map;
     let userMarker;
     let buildingMarkers = {};
+    let routeLine;
+    let isIndoorActive = false;
+
+    // حدود مستطيل الكليات الأربع (حظر الخروج عن الحرم)
+    const southWest = L.latLng(35.51958875818877, 35.80444387688746);
+    const northEast = L.latLng(35.52780824158785, 35.81065192458042);
+    const campusBounds = L.latLngBounds(southWest, northEast);
 
     // إحداثيات المدخل الرئيسي والمباني الأربعة
     const campusData = {
@@ -224,15 +231,20 @@
     };
 
     function initOutdoorMap() {
-      // التمركز الأولي عند المدخل الرئيسي
-      map = L.map('outdoor-map').setView([campusData.main.lat, campusData.main.lng], 16);
+      // إعداد الخريطة مع حظر الحدود وتقييد الزوم لمنع اللاغ
+      map = L.map('outdoor-map', {
+        maxBounds: campusBounds,
+        maxBoundsViscosity: 1.0, // جدار مرن لمنع السحب خارج الحرم
+        minZoom: 15,
+        maxZoom: 19
+      }).setView([campusData.main.lat, campusData.main.lng], 16);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      // إضافة دبابيس لكافة المباني على الخريطة
+      // تثبيت دبابيس المباني
       Object.keys(campusData).forEach(key => {
         const item = campusData[key];
         const marker = L.marker([item.lat, item.lng]).addTo(map)
@@ -240,40 +252,91 @@
         buildingMarkers[key] = marker;
       });
 
-      // فتح نافذة المدخل الرئيسي أوتوماتيكياً
       buildingMarkers['main'].openPopup();
+    }
+
+    function locateUser() {
+      if (!navigator.geolocation) {
+        alert("خدمة الـ GPS غير مدعومة في جهازك.");
+        return;
+      }
+
+      // إعدادات محسّنة لمنع التعليق
+      const geoOptions = {
+        timeout: 5000,
+        maximumAge: 30000,
+        enableHighAccuracy: true
+      };
+
+      navigator.geolocation.getCurrentPosition(position => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const userLatLng = L.latLng(userLat, userLng);
+
+        // 1. فحص هل الطالب داخل حدود الكليات؟
+        if (!campusBounds.contains(userLatLng)) {
+          alert("أنت حالياً خارج نطاق الحرم الجامعي! يمكنك استكشاف الخريطة والتنقل بين الكليات يدوياً.");
+          return;
+        }
+
+        // 2. إذا كان داخل الحرم: وضع الدبوس ورسم المسار
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.marker([userLat, userLng]).addTo(map)
+          .bindPopup('موقعك الحالي 📍').openPopup();
+
+        const selectedBuildingKey = document.getElementById('building-select-outdoor').value;
+        
+        if (selectedBuildingKey && campusData[selectedBuildingKey]) {
+          const target = campusData[selectedBuildingKey];
+          drawRouteLine([userLat, userLng], [target.lat, target.lng]);
+
+          const fitBounds = L.latLngBounds([[userLat, userLng], [target.lat, target.lng]]);
+          map.fitBounds(fitBounds, { padding: [40, 40] });
+        } else {
+          map.setView([userLat, userLng], 18);
+        }
+
+      }, () => {
+        alert("تعذر تحديد الموقع، يرجى تفعيل الـ GPS في هاتفك.");
+      }, geoOptions);
     }
 
     function focusBuildingOnMap(key) {
       if (campusData[key]) {
         const target = campusData[key];
-        map.flyTo([target.lat, target.lng], 18, { animate: true, duration: 1 });
+
+        if (userMarker) {
+          const userLatLng = userMarker.getLatLng();
+          drawRouteLine([userLatLng.lat, userLatLng.lng], [target.lat, target.lng]);
+
+          const bounds = L.latLngBounds([[userLatLng.lat, userLatLng.lng], [target.lat, target.lng]]);
+          map.fitBounds(bounds, { padding: [40, 40] });
+        } else {
+          map.flyTo([target.lat, target.lng], 18, { animate: true, duration: 0.8 });
+        }
+
         buildingMarkers[key].openPopup();
       }
+    }
+
+    // رسم مسار نظيف مع مسح الخطوط القديمة لمنع استنزاف الذاكرة
+    function drawRouteLine(fromLatLng, toLatLng) {
+      if (routeLine) {
+        map.removeLayer(routeLine);
+      }
+
+      routeLine = L.polyline([fromLatLng, toLatLng], {
+        color: '#2481cc',
+        weight: 4,
+        dashArray: '8, 8',
+        opacity: 0.8
+      }).addTo(map);
     }
 
     function syncAndChangeBuilding(key) {
       document.getElementById('building-select-outdoor').value = key;
       focusBuildingOnMap(key);
       updateRooms();
-    }
-
-    function locateUser() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-
-          if (userMarker) map.removeLayer(userMarker);
-
-          userMarker = L.marker([lat, lng]).addTo(map)
-            .bindPopup('موقعك الحالي 📍').openPopup();
-
-          map.setView([lat, lng], 18);
-        }, () => {
-          alert("تعذر تحديد الموقع، يرجى تفعيل الـ GPS في هاتفك.");
-        });
-      }
     }
 
     function updateRooms() {
@@ -293,7 +356,9 @@
         });
       }
 
-      drawIndoorMap();
+      if (isIndoorActive) {
+        drawIndoorMap();
+      }
     }
 
     function switchView(view) {
@@ -303,12 +368,14 @@
       const btnIndoor = document.getElementById('btn-indoor');
 
       if (view === 'outdoor') {
+        isIndoorActive = false;
         outdoorContainer.style.display = 'block';
         indoorContainer.style.display = 'none';
         btnOutdoor.classList.add('active');
         btnIndoor.classList.remove('active');
-        setTimeout(() => map.invalidateSize(), 200);
+        setTimeout(() => map.invalidateSize(), 150);
       } else {
+        isIndoorActive = true;
         outdoorContainer.style.display = 'none';
         indoorContainer.style.display = 'block';
         btnIndoor.classList.add('active');
