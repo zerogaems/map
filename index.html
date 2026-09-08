@@ -21,132 +21,41 @@
       --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .top-nav { display: flex; background-color: var(--secondary-bg); padding: 6px; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; }
+    .nav-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: var(--text-color); font-weight: bold; font-size: 13px; cursor: pointer; }
+    .nav-btn.active { background-color: var(--button-color); color: var(--button-text); }
 
-    .top-nav {
-      display: flex;
-      background-color: var(--secondary-bg);
-      padding: 8px;
-      gap: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-
-    .nav-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background-color: transparent;
-      color: var(--text-color);
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .nav-btn.active {
-      background-color: var(--button-color);
-      color: var(--button-text);
-    }
-
-    .map-container {
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    #outdoor-map {
-      width: 100%;
-      height: 100%;
-    }
-
-    #indoor-container {
-      background-color: #0f172a;
-    }
+    .map-container { flex: 1; width: 100%; height: 100%; position: relative; }
+    #outdoor-map { width: 100%; height: 100%; }
+    #indoor-container { background-color: #0f172a; }
 
     .controls-panel {
-      position: absolute;
-      bottom: 15px;
-      left: 15px;
-      right: 15px;
-      background-color: var(--bg-color);
-      padding: 12px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      position: absolute; bottom: 10px; left: 10px; right: 10px;
+      background-color: var(--bg-color); padding: 10px; border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; display: flex; flex-direction: column; gap: 6px;
     }
 
-    .dropdown-group {
-      display: flex;
-      gap: 6px;
-    }
-
-    select, button.action-btn {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 12px;
-      background-color: var(--secondary-bg);
-      color: var(--text-color);
-    }
-
+    .dropdown-group { display: flex; gap: 4px; }
+    select, button.action-btn { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 11px; background-color: var(--secondary-bg); color: var(--text-color); }
     select { flex: 1; }
 
-    .btn-row {
-      display: flex;
-      gap: 6px;
-    }
+    .btn-row { display: flex; gap: 6px; }
+    button.action-btn { flex: 1; background-color: var(--button-color); color: var(--button-text); border: none; font-weight: bold; cursor: pointer; }
+    button.secondary-btn { background-color: var(--secondary-bg); color: var(--text-color); border: 1px solid #ccc; }
 
-    button.action-btn {
-      flex: 1;
-      background-color: var(--button-color);
-      color: var(--button-text);
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button.secondary-btn {
-      background-color: var(--secondary-bg);
-      color: var(--text-color);
-      border: 1px solid #ccc;
-    }
-
-    #indoor-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
+    #indoor-canvas { width: 100%; height: 100%; display: block; }
   </style>
 </head>
 <body>
 
-  <!-- شريط التنقل العلوي -->
   <div class="top-nav">
     <button id="btn-outdoor" class="nav-btn active" onclick="switchView('outdoor')">الخارجية (الجامعة)</button>
     <button id="btn-indoor" class="nav-btn" onclick="switchView('indoor')">الداخلية (الكلية)</button>
   </div>
 
-  <!-- الخريطة الخارجية -->
   <div id="outdoor-container" class="map-container">
     <div id="outdoor-map"></div>
     <div class="controls-panel">
@@ -163,15 +72,14 @@
     </div>
   </div>
 
-  <!-- المخطط الداخلي -->
   <div id="indoor-container" class="map-container" style="display: none;">
     <canvas id="indoor-canvas"></canvas>
     
     <div class="controls-panel">
       <div class="dropdown-group">
         <select id="building-select-indoor" onchange="syncAndChangeBuilding(this.value)">
-          <option value="twasaa">2. مبنى التوسع</option>
           <option value="hamak">1. كلية الهمك</option>
+          <option value="twasaa">2. مبنى التوسع</option>
           <option value="adab">3. كلية الآداب</option>
           <option value="uloom">4. كلية العلوم</option>
         </select>
@@ -192,21 +100,12 @@
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
-    function notify(message) {
-      if (tg && tg.showAlert) {
-        tg.showAlert(message);
-      } else {
-        alert(message);
-      }
-    }
+    function notify(message) { if (tg && tg.showAlert) tg.showAlert(message); else alert(message); }
 
-    let map;
-    let userMarker;
+    let map, userMarker, routeLine;
     let buildingMarkers = {};
-    let routeLine;
     let isIndoorActive = false;
 
     const southWest = L.latLng(35.51958875818877, 35.80444387688746);
@@ -216,529 +115,322 @@
     const campusData = {
       main: { name: "المدخل الرئيسي للجامعة", lat: 35.52601940733772, lng: 35.806881711117235 },
       hamak: {
-        name: "كلية الهمك",
-        lat: 35.524735104049554,
-        lng: 35.80832173303512,
+        name: "كلية الهمك", lat: 35.524735104049554, lng: 35.80832173303512,
         floors: {
-          ground: { name: "الطابق الأرضي", rooms: ["21م", "22م", "23م"] },
-          first:  { name: "الطابق الأول",   rooms: ["21ك", "22ك", "23ك", "44ك"] },
-          second: { name: "الطابق الثاني",  rooms: ["مخبر الحاسوب 1", "مخبر الحاسوب 2"] },
-          third:  { name: "الطابق الثالث",  rooms: ["قاعة الماجستير"] }
+          ground: { name: "الطابق الأرضي", rooms: ["بي 1", "بي 2", "شؤون الطلاب", "مركز الدعم"] }
         }
       },
       twasaa: {
-        name: "مبنى التوسع",
-        lat: 35.52309984997797,
-        lng: 35.809953816186045,
-        floors: {
-          ground: { name: "الطابق الأرضي", rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"] }
-        }
+        name: "مبنى التوسع", lat: 35.52309984997797, lng: 35.809953816186045,
+        floors: { ground: { name: "الطابق الأرضي", rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"] } }
       },
       adab: {
-        name: "كلية الآداب",
-        lat: 35.52142722934893,
-        lng: 35.808531572615784,
+        name: "كلية الآداب", lat: 35.52142722934893, lng: 35.808531572615784,
         floors: {
-          ground: { name: "الطابق الأرضي", rooms: ["مدرج 1", "مدرج 2", "ق1", "ق2"] }
+          ground: { name: "الطابق الأرضي", rooms: ["مدرج 1", "مدرج 2", "ق1 (بالقبو)", "ق2 (بالقبو)"] },
+          basement: { name: "طابق القبو", rooms: ["ق1", "ق2"] }
         }
       },
       uloom: {
-        name: "كلية العلوم",
-        lat: 35.523082390509956,
-        lng: 35.805570862320266,
-        floors: {
-          ground: { name: "الطابق الأرضي", rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"] }
-        }
+        name: "كلية العلوم", lat: 35.523082390509956, lng: 35.805570862320266,
+        floors: { ground: { name: "الطابق الأرضي", rooms: ["المدرج الرابع"] } }
       }
     };
 
-    /* -------------------------------------------------------------
-       1. الخريطة الخارجية (LEAFLET MAP)
-    ------------------------------------------------------------- */
     function initOutdoorMap() {
-      map = L.map('outdoor-map', {
-        maxBounds: campusBounds,
-        maxBoundsViscosity: 0.5,
-        minZoom: 16,
-        maxZoom: 19
-      }).setView([campusData.main.lat, campusData.main.lng], 17);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
-
+      map = L.map('outdoor-map', { maxBounds: campusBounds, minZoom: 16, maxZoom: 19 }).setView([campusData.main.lat, campusData.main.lng], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
       Object.keys(campusData).forEach(key => {
-        const item = campusData[key];
-        const marker = L.marker([item.lat, item.lng]).addTo(map)
-          .bindPopup(`<b>${item.name}</b>`);
-        buildingMarkers[key] = marker;
+        buildingMarkers[key] = L.marker([campusData[key].lat, campusData[key].lng]).addTo(map).bindPopup(`<b>${campusData[key].name}</b>`);
       });
-
-      buildingMarkers['main'].openPopup();
     }
 
     function locateUser() {
       const btn = document.getElementById('btn-locate');
       btn.innerText = "⏳ جاري تحديد الموقع...";
-
-      if (!navigator.geolocation) {
-        notify("خدمة الـ GPS غير مدعومة في متصفحك.");
-        btn.innerText = "📍 حدد موقعي وارسم المسار";
-        return;
-      }
-
-      const geoOptions = { timeout: 15000, maximumAge: 60000, enableHighAccuracy: false };
-
       navigator.geolocation.getCurrentPosition(
-        position => {
+        pos => {
           btn.innerText = "📍 حدد موقعي وارسم المسار";
-          const userLat = position.coords.latitude;
-          const userLng = position.coords.longitude;
-          const userLatLng = L.latLng(userLat, userLng);
-
-          if (!campusBounds.contains(userLatLng)) {
-            notify("أنت حالياً خارج نطاق الحرم الجامعي! يمكنك استكشاف الخريطة والتنقل بين الكليات يدوياً.");
-            return;
-          }
-
+          const uLat = pos.coords.latitude, uLng = pos.coords.longitude;
           if (userMarker) map.removeLayer(userMarker);
-          userMarker = L.marker([userLat, userLng]).addTo(map)
-            .bindPopup('موقعك الحالي 📍').openPopup();
-
-          const selectedBuildingKey = document.getElementById('building-select-outdoor').value;
-          
-          if (selectedBuildingKey && campusData[selectedBuildingKey]) {
-            const target = campusData[selectedBuildingKey];
-            drawRouteLine([userLat, userLng], [target.lat, target.lng]);
-
-            const fitBounds = L.latLngBounds([[userLat, userLng], [target.lat, target.lng]]);
-            map.fitBounds(fitBounds, { padding: [40, 40] });
-          } else {
-            map.setView([userLat, userLng], 18);
-          }
+          userMarker = L.marker([uLat, uLng]).addTo(map).bindPopup('موقعك 📍').openPopup();
+          const bKey = document.getElementById('building-select-outdoor').value;
+          if (bKey && campusData[bKey]) drawRouteLine([uLat, uLng], [campusData[bKey].lat, campusData[bKey].lng]);
         },
-        error => {
-          btn.innerText = "📍 حدد موقعي وارسم المسار";
-          let errorMsg = "تعذر تحديد الموقع.";
-          if (error.code === 1) errorMsg = "يرجى منح صلاحية الموقع للتطبيق في إعدادات الهاتف.";
-          else if (error.code === 2) errorMsg = "إشارة الـ GPS ضعيفة حالياً، يرجى المحاولة في مكان مكشوف.";
-          else if (error.code === 3) errorMsg = "استغرق تحديد الموقع وقتاً طويلاً، حاول مرة أخرى.";
-          notify(errorMsg);
-        },
-        geoOptions
+        () => { btn.innerText = "📍 حدد موقعي وارسم المسار"; notify("تعذر تحديد الموقع."); }
       );
     }
 
     function focusBuildingOnMap(key) {
       if (campusData[key]) {
-        const target = campusData[key];
-
-        if (userMarker) {
-          const userLatLng = userMarker.getLatLng();
-          drawRouteLine([userLatLng.lat, userLatLng.lng], [target.lat, target.lng]);
-
-          const bounds = L.latLngBounds([[userLatLng.lat, userLatLng.lng], [target.lat, target.lng]]);
-          map.fitBounds(bounds, { padding: [40, 40] });
-        } else {
-          map.flyTo([target.lat, target.lng], 18, { animate: true, duration: 0.8 });
-        }
-
+        if (userMarker) drawRouteLine([userMarker.getLatLng().lat, userMarker.getLatLng().lng], [campusData[key].lat, campusData[key].lng]);
+        else map.flyTo([campusData[key].lat, campusData[key].lng], 18);
         buildingMarkers[key].openPopup();
       }
     }
 
-    function drawRouteLine(fromLatLng, toLatLng) {
+    function drawRouteLine(from, to) {
       if (routeLine) map.removeLayer(routeLine);
-
-      routeLine = L.polyline([fromLatLng, toLatLng], {
-        color: '#2481cc',
-        weight: 4,
-        dashArray: '8, 8',
-        opacity: 0.8
-      }).addTo(map);
+      routeLine = L.polyline([from, to], { color: '#2481cc', weight: 4, dashArray: '8, 8' }).addTo(map);
     }
 
     function syncAndChangeBuilding(key) {
       document.getElementById('building-select-outdoor').value = key;
-      focusBuildingOnMap(key);
       updateFloorsAndRooms();
     }
 
     function updateFloorsAndRooms() {
-      const buildingKey = document.getElementById('building-select-indoor').value;
-      const floorSelect = document.getElementById('floor-select');
-      const roomSelect = document.getElementById('room-select');
+      const bKey = document.getElementById('building-select-indoor').value;
+      const fSel = document.getElementById('floor-select');
+      const rSel = document.getElementById('room-select');
+      const bInfo = campusData[bKey];
 
-      const buildingInfo = campusData[buildingKey];
-
-      if (floorSelect.getAttribute('data-building') !== buildingKey) {
-        floorSelect.innerHTML = '';
-        floorSelect.setAttribute('data-building', buildingKey);
-
-        Object.keys(buildingInfo.floors).forEach(fKey => {
-          const opt = document.createElement('option');
-          opt.value = fKey;
-          opt.textContent = buildingInfo.floors[fKey].name;
-          floorSelect.appendChild(opt);
+      if (fSel.getAttribute('data-building') !== bKey) {
+        fSel.innerHTML = ''; fSel.setAttribute('data-building', bKey);
+        Object.keys(bInfo.floors).forEach(f => {
+          let opt = document.createElement('option'); opt.value = f; opt.textContent = bInfo.floors[f].name; fSel.appendChild(opt);
         });
       }
 
-      const currentFloorKey = floorSelect.value || Object.keys(buildingInfo.floors)[0];
-      roomSelect.innerHTML = '';
-
-      if (buildingInfo.floors[currentFloorKey]) {
-        const rooms = buildingInfo.floors[currentFloorKey].rooms;
-        rooms.forEach(room => {
-          const option = document.createElement('option');
-          option.value = room;
-          option.textContent = room;
-          roomSelect.appendChild(option);
+      const fKey = fSel.value || Object.keys(bInfo.floors)[0];
+      rSel.innerHTML = '';
+      if (bInfo.floors[fKey]) {
+        bInfo.floors[fKey].rooms.forEach(r => {
+          let opt = document.createElement('option'); opt.value = r; opt.textContent = r; rSel.appendChild(opt);
         });
       }
-
       resetIndoorAnimation();
     }
 
     function switchView(view) {
-      const outdoorContainer = document.getElementById('outdoor-container');
-      const indoorContainer = document.getElementById('indoor-container');
-      const btnOutdoor = document.getElementById('btn-outdoor');
-      const btnIndoor = document.getElementById('btn-indoor');
-
-      if (view === 'outdoor') {
-        isIndoorActive = false;
-        cancelAnimationFrame(animationFrameId);
-        outdoorContainer.style.display = 'block';
-        indoorContainer.style.display = 'none';
-        btnOutdoor.classList.add('active');
-        btnIndoor.classList.remove('active');
-        setTimeout(() => map.invalidateSize(), 150);
-      } else {
-        isIndoorActive = true;
-        outdoorContainer.style.display = 'none';
-        indoorContainer.style.display = 'block';
-        btnIndoor.classList.add('active');
-        btnOutdoor.classList.remove('active');
-        updateFloorsAndRooms();
-      }
+      document.getElementById('outdoor-container').style.display = (view === 'outdoor') ? 'block' : 'none';
+      document.getElementById('indoor-container').style.display = (view === 'indoor') ? 'block' : 'none';
+      document.getElementById('btn-outdoor').classList.toggle('active', view === 'outdoor');
+      document.getElementById('btn-indoor').classList.toggle('active', view === 'indoor');
+      if (view === 'indoor') updateFloorsAndRooms();
+      else setTimeout(() => map.invalidateSize(), 150);
     }
 
     /* -------------------------------------------------------------
-       2. المخطط الداخلي الهندسي المعدل لمبنى التوسع (رفع المخطط للأعلى)
+       رسم المخططات البرمجية لمباني الكليات
     ------------------------------------------------------------- */
-    let animationFrameId;
-    let avatarProgress = 0;
-    let isNavigating = false;
-    let currentPath = [];
+    let animationFrameId, avatarProgress = 0, isNavigating = false, currentPath = [];
 
-    function resetIndoorAnimation() {
-      cancelAnimationFrame(animationFrameId);
-      avatarProgress = 0;
-      isNavigating = false;
-      drawIndoorCanvas();
-    }
-
-    function replayNavigation() {
-      if (!document.getElementById('room-select').value) return;
-      startIndoorNavigation();
-    }
+    function resetIndoorAnimation() { cancelAnimationFrame(animationFrameId); avatarProgress = 0; isNavigating = false; drawIndoorCanvas(); }
+    function replayNavigation() { startIndoorNavigation(); }
 
     function drawIndoorCanvas(avatarPos = null) {
       const canvas = document.getElementById('indoor-canvas');
       const ctx = canvas.getContext('2d');
-      const buildingKey = document.getElementById('building-select-indoor').value;
+      const bKey = document.getElementById('building-select-indoor').value;
+      const fKey = document.getElementById('floor-select').value || 'ground';
       const selectedRoom = document.getElementById('room-select').value;
 
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
+      const w = canvas.width, h = canvas.height;
 
-      const w = canvas.width;
-      const h = canvas.height;
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, w, h);
 
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, w, h);
+      if (bKey === 'twasaa') drawTwasaa(ctx, w, h, selectedRoom, avatarPos);
+      else if (bKey === 'uloom') drawUloom(ctx, w, h, selectedRoom, avatarPos);
+      else if (bKey === 'adab') drawAdab(ctx, w, h, fKey, selectedRoom, avatarPos);
+      else if (bKey === 'hamak') drawHamakGround(ctx, w, h, selectedRoom, avatarPos);
 
-      if (buildingKey === 'twasaa') {
-        drawTwasaaLayout(ctx, w, h, selectedRoom, avatarPos);
-      } else {
-        drawDefaultLayout(ctx, w, h, selectedRoom, avatarPos);
-      }
-
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = 'bold 15px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`${campusData[buildingKey].name}`, w / 2, 28);
+      ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(`${campusData[bKey].name} - ${campusData[bKey].floors[fKey]?.name || ''}`, w / 2, 25);
     }
 
-    // إحداثيات جديدة مضغوطة ومرفوعة للأعلى لتبقى فوق لوحة الأزرار
-    function drawTwasaaLayout(ctx, w, h, selectedRoom, avatarPos) {
-      const entrance = { x: w * 0.50, y: h * 0.69 };
-      const bottomCorridorY = h * 0.63;
-      
-      const garden = {
-        x: w * 0.35,
-        y: h * 0.35,
-        width: w * 0.30,
-        height: h * 0.24
-      };
+    // 1. رسم التوسع
+    function drawTwasaa(ctx, w, h, selectedRoom, avatarPos) {
+      const entrance = { x: w * 0.50, y: h * 0.68 };
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.07; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(w*0.5, h*0.68); ctx.lineTo(w*0.5, h*0.60); ctx.stroke();
+      ctx.beginPath(); ctx.strokeRect(w*0.22, h*0.35, w*0.56, h*0.25);
+      ctx.beginPath(); ctx.moveTo(w*0.5, h*0.35); ctx.lineTo(w*0.5, h*0.10); ctx.stroke();
 
-      const rightCorridorX = w * 0.78;
-      const leftCorridorX = w * 0.22;
-      const topCorridorY = h * 0.35;
+      ctx.fillStyle = '#14532d'; ctx.fillRect(w*0.35, h*0.38, w*0.30, h*0.19);
+      ctx.fillStyle = '#86efac'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('حديقة عامة 🌿', w*0.5, h*0.48);
 
-      const narrowCorridorX = w * 0.50;
-      const narrowCorridorYStart = h * 0.35;
-      const narrowCorridorYEnd = h * 0.10;
-
-      // 1. الممرات
-      ctx.strokeStyle = '#334155';
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      ctx.lineWidth = w * 0.08;
-      ctx.beginPath();
-      ctx.moveTo(entrance.x, entrance.y);
-      ctx.lineTo(entrance.x, bottomCorridorY);
-      ctx.stroke();
-
-      ctx.lineWidth = w * 0.07;
-      ctx.beginPath();
-      ctx.moveTo(leftCorridorX, bottomCorridorY);
-      ctx.lineTo(rightCorridorX, bottomCorridorY);
-      ctx.lineTo(rightCorridorX, topCorridorY);
-      ctx.lineTo(leftCorridorX, topCorridorY);
-      ctx.lineTo(leftCorridorX, bottomCorridorY);
-      ctx.stroke();
-
-      ctx.lineWidth = w * 0.05;
-      ctx.beginPath();
-      ctx.moveTo(narrowCorridorX, narrowCorridorYStart);
-      ctx.lineTo(narrowCorridorX, narrowCorridorYEnd);
-      ctx.stroke();
-
-      // 2. الحديقة
-      ctx.fillStyle = '#14532d';
-      ctx.strokeStyle = '#22c55e';
-      ctx.lineWidth = 2;
-      ctx.fillRect(garden.x, garden.y, garden.width, garden.height);
-      ctx.strokeRect(garden.x, garden.y, garden.width, garden.height);
-
-      ctx.fillStyle = '#86efac';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('حديقة عامة 🌿', garden.x + garden.width / 2, garden.y + garden.height / 2 + 4);
-
-      // 3. الممر الأيسر
-      ctx.fillStyle = '#64748b';
-      ctx.font = '10px sans-serif';
-      ctx.fillText('ممر عبور', leftCorridorX, h * 0.49);
-
-      // 4. المدرجات الأربعة
       const rooms = [
-        { name: "مدرج 1", x: w * 0.89, y: h * 0.56, doorY: h * 0.56, sideX: rightCorridorX },
-        { name: "مدرج 2", x: w * 0.89, y: h * 0.41, doorY: h * 0.41, sideX: rightCorridorX },
-        { name: "مدرج 3", x: w * 0.72, y: h * 0.26, doorY: h * 0.26, sideX: narrowCorridorX },
-        { name: "مدرج 4", x: w * 0.72, y: h * 0.15, doorY: h * 0.15, sideX: narrowCorridorX }
+        { name: "مدرج 1", x: w*0.88, y: h*0.55 }, { name: "مدرج 2", x: w*0.88, y: h*0.40 },
+        { name: "مدرج 3", x: w*0.72, y: h*0.26 }, { name: "مدرج 4", x: w*0.72, y: h*0.14 }
       ];
-
       rooms.forEach(r => {
-        const isTarget = (r.name === selectedRoom);
-        const boxW = (r.name === "مدرج 3" || r.name === "مدرج 4") ? w * 0.22 : w * 0.16;
-        const boxH = h * 0.08;
+        let isT = (r.name === selectedRoom);
+        ctx.fillStyle = isT ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = isT ? '#38bdf8' : '#475569';
+        ctx.fillRect(r.x-25, r.y-12, 50, 24); ctx.strokeRect(r.x-25, r.y-12, 50, 24);
+        ctx.fillStyle = isT ? '#38bdf8' : '#94a3b8'; ctx.fillText(r.name, r.x, r.y+4);
+      });
+      drawAvatarAndPath(ctx, entrance, avatarPos);
+    }
 
-        ctx.strokeStyle = isTarget ? '#38bdf8' : '#1e293b';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(r.sideX, r.doorY);
-        ctx.lineTo(r.x, r.doorY);
-        ctx.stroke();
+    // 2. رسم العلوم (المدرج الرابع والأدراج)
+    function drawUloom(ctx, w, h, selectedRoom, avatarPos) {
+      const entrance = { x: w * 0.35, y: h * 0.68 };
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06;
+      ctx.beginPath(); ctx.strokeRect(w*0.20, h*0.50, w*0.30, h*0.18); // حديقة سفلية
+      ctx.beginPath(); ctx.moveTo(w*0.50, h*0.59); ctx.lineTo(w*0.50, h*0.38); ctx.stroke(); // ممر الدرج 1
+      ctx.beginPath(); ctx.strokeRect(w*0.35, h*0.25, w*0.40, h*0.13); // ساحة الحمامات
+      ctx.beginPath(); ctx.moveTo(w*0.75, h*0.30); ctx.lineTo(w*0.75, h*0.12); ctx.stroke();
 
-        ctx.fillStyle = isTarget ? '#1e3a8a' : '#1e293b';
-        ctx.strokeStyle = isTarget ? '#38bdf8' : '#475569';
-        ctx.lineWidth = isTarget ? 2.5 : 1.5;
+      // أدراج باللون البرتقالي
+      ctx.fillStyle = '#f97316'; ctx.fillRect(w*0.48, h*0.46, 12, 16); ctx.fillRect(w*0.53, h*0.30, 16, 12); ctx.fillRect(w*0.72, h*0.20, 12, 16);
 
-        ctx.fillRect(r.x - boxW / 2, r.y - boxH / 2, boxW, boxH);
-        ctx.strokeRect(r.x - boxW / 2, r.y - boxH / 2, boxW, boxH);
+      // خدمات
+      ctx.fillStyle = '#334155'; ctx.fillRect(w*0.55, h*0.52, 40, 18);
+      ctx.fillStyle = '#94a3b8'; ctx.font = '9px sans-serif'; ctx.fillText('كافيه', w*0.62, h*0.55);
 
-        ctx.fillStyle = isTarget ? '#38bdf8' : '#94a3b8';
-        ctx.font = isTarget ? 'bold 12px sans-serif' : '11px sans-serif';
-        ctx.fillText(r.name, r.x, r.y + 4);
+      let isT = (selectedRoom === "المدرج الرابع");
+      ctx.fillStyle = isT ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = isT ? '#38bdf8' : '#475569';
+      ctx.fillRect(w*0.40, h*0.10, 70, 26); ctx.strokeRect(w*0.40, h*0.10, 70, 26);
+      ctx.fillStyle = isT ? '#38bdf8' : '#94a3b8'; ctx.fillText('المدرج الرابع', w*0.50, h*0.13);
+
+      drawAvatarAndPath(ctx, entrance, avatarPos);
+    }
+
+    // 3. رسم الآداب (الأرضي والقبو)
+    function drawAdab(ctx, w, h, fKey, selectedRoom, avatarPos) {
+      const entrance = { x: w * 0.50, y: h * 0.68 };
+      if (fKey === 'ground') {
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06;
+        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.68); ctx.lineTo(w*0.5, h*0.20); ctx.stroke();
+        ctx.beginPath(); ctx.strokeRect(w*0.25, h*0.35, w*0.35, h*0.20);
+
+        // مدرج 1 و 2
+        let r1 = (selectedRoom === "مدرج 1"), r2 = (selectedRoom === "مدرج 2");
+        ctx.fillStyle = r1 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.75, h*0.45, 50, 22);
+        ctx.fillStyle = r2 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.12, h*0.40, 50, 22);
+
+        // درج القبو
+        ctx.fillStyle = '#a855f7'; ctx.fillRect(w*0.45, h*0.15, 30, 25);
+        ctx.fillStyle = '#ffffff'; ctx.font = '9px sans-serif'; ctx.fillText('درج القبو 🪜', w*0.5, h*0.18);
+      } else {
+        // طابق القبو
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06;
+        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.15); ctx.lineTo(w*0.5, h*0.40); ctx.lineTo(w*0.25, h*0.40); ctx.stroke();
+        ctx.beginPath(); ctx.strokeRect(w*0.20, h*0.45, w*0.45, h*0.22);
+
+        let q1 = (selectedRoom === "ق1"), q2 = (selectedRoom === "ق2");
+        ctx.fillStyle = q1 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.38, h*0.40, 40, 20);
+        ctx.fillStyle = q2 ? '#1e3a8a' : '#1e293b'; ctx.fillRect(w*0.12, h*0.52, 40, 20);
+      }
+      drawAvatarAndPath(ctx, entrance, avatarPos);
+    }
+
+    // 4. رسم الهمك - الأرضي (الأدراج الأربعة والخدمات)
+    function drawHamakGround(ctx, w, h, selectedRoom, avatarPos) {
+      const entrance = { x: w * 0.20, y: h * 0.68 };
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = w * 0.06;
+      ctx.beginPath(); ctx.moveTo(w*0.20, h*0.68); ctx.lineTo(w*0.20, h*0.35); ctx.lineTo(w*0.70, h*0.35); ctx.stroke();
+      ctx.beginPath(); ctx.strokeRect(w*0.65, h*0.20, w*0.28, h*0.30); // الساحة الأخيرة
+
+      // الأدراج الأربعة
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(w*0.28, h*0.60, 12, 16); ctx.fillText('د1', w*0.30, h*0.63);
+      ctx.fillRect(w*0.35, h*0.30, 16, 12); ctx.fillText('د2', w*0.37, h*0.28);
+      ctx.fillRect(w*0.60, h*0.38, 16, 12); ctx.fillText('د3', w*0.62, h*0.41);
+      ctx.fillRect(w*0.88, h*0.32, 12, 16); ctx.fillText('د4', w*0.90, h*0.35);
+
+      // الكلية المدنية (كتلة جدارية)
+      ctx.fillStyle = '#475569'; ctx.fillRect(w*0.05, h*0.40, 45, 60);
+      ctx.fillStyle = '#ffffff'; ctx.font = '9px sans-serif'; ctx.fillText('المدنية', w*0.12, h*0.48);
+
+      // القاعات B1 و B2 وشؤون الطلاب ومركز الدعم
+      const rooms = [
+        { name: "بي 1", x: w*0.60, y: h*0.18 }, { name: "بي 2", x: w*0.60, y: h*0.26 },
+        { name: "شؤون الطلاب", x: w*0.78, y: h*0.12 }, { name: "مركز الدعم", x: w*0.78, y: h*0.52 }
+      ];
+      rooms.forEach(r => {
+        let isT = (r.name === selectedRoom);
+        ctx.fillStyle = isT ? '#1e3a8a' : '#1e293b'; ctx.strokeStyle = isT ? '#38bdf8' : '#475569';
+        ctx.fillRect(r.x-25, r.y-10, 50, 20); ctx.strokeRect(r.x-25, r.y-10, 50, 20);
+        ctx.fillStyle = isT ? '#38bdf8' : '#94a3b8'; ctx.fillText(r.name, r.x, r.y+4);
       });
 
-      // 5. المدخل مكشوف فوق الأزرار
-      ctx.fillStyle = '#22c55e';
-      ctx.beginPath();
-      ctx.arc(entrance.x, entrance.y, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.fillText('المدخل 🚪', entrance.x, entrance.y - 12);
-
-      // 6. مسار الحركة
-      if (currentPath.length > 1 && isNavigating) {
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(currentPath[0].x, currentPath[0].y);
-        for (let i = 1; i < currentPath.length; i++) {
-          ctx.lineTo(currentPath[i].x, currentPath[i].y);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
-      // 7. شخصية الطالب
-      const drawPos = avatarPos || entrance;
-      ctx.fillStyle = '#38bdf8';
-      ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.arc(drawPos.x, drawPos.y, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      drawAvatarAndPath(ctx, entrance, avatarPos);
     }
 
-    function drawDefaultLayout(ctx, w, h, selectedRoom, avatarPos) {
-      const centerX = w * 0.5;
-      const corridorY = h * 0.45;
-      const entrance = { x: centerX, y: h * 0.68 };
-
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = w * 0.08;
-      ctx.beginPath();
-      ctx.moveTo(entrance.x, entrance.y);
-      ctx.lineTo(centerX, corridorY);
-      ctx.moveTo(w * 0.2, corridorY);
-      ctx.lineTo(w * 0.8, corridorY);
-      ctx.stroke();
-
+    function drawAvatarAndPath(ctx, entrance, avatarPos) {
+      if (currentPath.length > 1 && isNavigating) {
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(currentPath[0].x, currentPath[0].y);
+        for (let i = 1; i < currentPath.length; i++) ctx.lineTo(currentPath[i].x, currentPath[i].y);
+        ctx.stroke(); ctx.setLineDash([]);
+      }
       const drawPos = avatarPos || entrance;
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.arc(drawPos.x, drawPos.y, 8, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(drawPos.x, drawPos.y, 7, 0, Math.PI * 2); ctx.fill();
     }
 
     function startIndoorNavigation() {
-      const buildingKey = document.getElementById('building-select-indoor').value;
+      const bKey = document.getElementById('building-select-indoor').value;
       const selectedRoom = document.getElementById('room-select').value;
       const canvas = document.getElementById('indoor-canvas');
-      const w = canvas.width;
-      const h = canvas.height;
+      const w = canvas.width, h = canvas.height;
 
-      if (!selectedRoom) {
-        notify("يرجى اختيار القاعة أولاً.");
-        return;
-      }
-
-      if (buildingKey === 'twasaa') {
-        const entrance = { x: w * 0.50, y: h * 0.69 };
-        const bottomJunction = { x: w * 0.50, y: h * 0.63 };
-        const rightJunctionBottom = { x: w * 0.78, y: h * 0.63 };
-        const rightJunctionTop = { x: w * 0.78, y: h * 0.35 };
-        const narrowJunction = { x: w * 0.50, y: h * 0.35 };
-
-        if (selectedRoom === "مدرج 1") {
-          currentPath = [
-            entrance,
-            bottomJunction,
-            rightJunctionBottom,
-            { x: w * 0.78, y: h * 0.56 },
-            { x: w * 0.89, y: h * 0.56 }
-          ];
-        } else if (selectedRoom === "مدرج 2") {
-          currentPath = [
-            entrance,
-            bottomJunction,
-            rightJunctionBottom,
-            { x: w * 0.78, y: h * 0.41 },
-            { x: w * 0.89, y: h * 0.41 }
-          ];
-        } else if (selectedRoom === "مدرج 3") {
-          currentPath = [
-            entrance,
-            bottomJunction,
-            rightJunctionBottom,
-            rightJunctionTop,
-            narrowJunction,
-            { x: w * 0.50, y: h * 0.26 },
-            { x: w * 0.72, y: h * 0.26 }
-          ];
-        } else if (selectedRoom === "مدرج 4") {
-          currentPath = [
-            entrance,
-            bottomJunction,
-            rightJunctionBottom,
-            rightJunctionTop,
-            narrowJunction,
-            { x: w * 0.50, y: h * 0.15 },
-            { x: w * 0.72, y: h * 0.15 }
-          ];
+      // توليد المسارات التفصيلية بناءً على القاعة المختارة
+      if (bKey === 'twasaa') {
+        const ent = { x: w * 0.50, y: h * 0.68 };
+        if (selectedRoom === "مدرج 1") currentPath = [ent, { x: w*0.5, y: h*0.55 }, { x: w*0.88, y: h*0.55 }];
+        else if (selectedRoom === "مدرج 2") currentPath = [ent, { x: w*0.5, y: h*0.40 }, { x: w*0.88, y: h*0.40 }];
+        else if (selectedRoom === "مدرج 3") currentPath = [ent, { x: w*0.5, y: h*0.26 }, { x: w*0.72, y: h*0.26 }];
+        else if (selectedRoom === "مدرج 4") currentPath = [ent, { x: w*0.5, y: h*0.14 }, { x: w*0.72, y: h*0.14 }];
+      } else if (bKey === 'uloom') {
+        currentPath = [{ x: w * 0.35, y: h * 0.68 }, { x: w * 0.50, y: h * 0.59 }, { x: w * 0.50, y: h * 0.30 }, { x: w * 0.75, y: h * 0.30 }, { x: w * 0.75, y: h * 0.13 }, { x: w * 0.50, y: h * 0.13 }];
+      } else if (bKey === 'adab') {
+        const fKey = document.getElementById('floor-select').value;
+        if (fKey === 'ground') {
+          if (selectedRoom.includes("قبو")) currentPath = [{ x: w * 0.5, y: h * 0.68 }, { x: w * 0.5, y: h * 0.18 }];
+          else if (selectedRoom === "مدرج 1") currentPath = [{ x: w * 0.5, y: h * 0.68 }, { x: w * 0.5, y: h * 0.45 }, { x: w * 0.75, y: h * 0.45 }];
+          else currentPath = [{ x: w * 0.5, y: h * 0.68 }, { x: w * 0.5, y: h * 0.40 }, { x: w * 0.12, y: h * 0.40 }];
+        } else {
+          if (selectedRoom === "ق1") currentPath = [{ x: w * 0.5, y: h * 0.15 }, { x: w * 0.5, y: h * 0.40 }, { x: w * 0.38, y: h * 0.40 }];
+          else currentPath = [{ x: w * 0.5, y: h * 0.15 }, { x: w * 0.5, y: h * 0.40 }, { x: w * 0.25, y: h * 0.40 }, { x: w * 0.25, y: h * 0.52 }, { x: w * 0.12, y: h * 0.52 }];
         }
+      } else if (bKey === 'hamak') {
+        const ent = { x: w * 0.20, y: h * 0.68 };
+        if (selectedRoom === "بي 1") currentPath = [ent, { x: w*0.2, y: h*0.35 }, { x: w*0.6, y: h*0.35 }, { x: w*0.6, y: h*0.18 }];
+        else if (selectedRoom === "بي 2") currentPath = [ent, { x: w*0.2, y: h*0.35 }, { x: w*0.6, y: h*0.35 }, { x: w*0.6, y: h*0.26 }];
+        else if (selectedRoom === "شؤون الطلاب") currentPath = [ent, { x: w*0.2, y: h*0.35 }, { x: w*0.78, y: h*0.35 }, { x: w*0.78, y: h*0.12 }];
+        else if (selectedRoom === "مركز الدعم") currentPath = [ent, { x: w*0.2, y: h*0.35 }, { x: w*0.78, y: h*0.35 }, { x: w*0.78, y: h*0.52 }];
       }
 
-      avatarProgress = 0;
-      isNavigating = true;
-
-      cancelAnimationFrame(animationFrameId);
-      animateAvatar();
+      avatarProgress = 0; isNavigating = true;
+      cancelAnimationFrame(animationFrameId); animateAvatar();
     }
 
     function animateAvatar() {
       avatarProgress += 0.004;
-
       if (avatarProgress >= 1) {
-        avatarProgress = 1;
-        isNavigating = false;
-        const selectedRoom = document.getElementById('room-select').value;
-        const currentPos = getPointOnPath(currentPath, 1);
-        drawIndoorCanvas(currentPos);
-        notify(`وصلت بنجاح إلى [${selectedRoom}] 🎯`);
+        avatarProgress = 1; isNavigating = false;
+        drawIndoorCanvas(getPointOnPath(currentPath, 1));
+        notify(`وصلت إلى [${document.getElementById('room-select').value}] 🎯`);
         return;
       }
-
-      const currentPos = getPointOnPath(currentPath, avatarProgress);
-      drawIndoorCanvas(currentPos);
-
+      drawIndoorCanvas(getPointOnPath(currentPath, avatarProgress));
       animationFrameId = requestAnimationFrame(animateAvatar);
     }
 
     function getPointOnPath(path, t) {
       if (path.length < 2) return path[0];
-
-      let totalDist = 0;
-      let dists = [];
-
+      let totalDist = 0, dists = [];
       for (let i = 0; i < path.length - 1; i++) {
         let d = Math.hypot(path[i + 1].x - path[i].x, path[i + 1].y - path[i].y);
-        dists.push(d);
-        totalDist += d;
+        dists.push(d); totalDist += d;
       }
-
       let travel = t * totalDist;
-
       for (let i = 0; i < dists.length; i++) {
         if (travel <= dists[i]) {
-          let segmentT = travel / dists[i];
-          return {
-            x: path[i].x + (path[i + 1].x - path[i].x) * segmentT,
-            y: path[i].y + (path[i + 1].y - path[i].y) * segmentT
-          };
+          let segT = travel / dists[i];
+          return { x: path[i].x + (path[i + 1].x - path[i].x) * segT, y: path[i].y + (path[i + 1].y - path[i].y) * segT };
         }
         travel -= dists[i];
       }
-
       return path[path.length - 1];
     }
 
-    window.onload = function() {
-      initOutdoorMap();
-    };
+    window.onload = function() { initOutdoorMap(); };
   </script>
 </body>
 </html>
