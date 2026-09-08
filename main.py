@@ -3,8 +3,8 @@ from telebot import TeleBot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # جلب التوكن من متغيرات البيئة (Environment Variables) في Render أو وضعه مباشرة
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "ضع_التوكن_الخاص_بك_هنا")
-WEB_APP_URL = "https://your-web-app-link.com"  # رابط موقعك الـ HTML الجاهز
+BOT_TOKEN = os.environ.get("8036903555:AAGroUTxYo2dghkMf-_ifFTxjlDauC2nLv4", "ضع_التوكن_الخاص_بك_هنا")
+WEB_APP_URL = "https://zerogaems.github.io/map/"  # رابط موقعك الـ HTML الجاهز
 
 bot = TeleBot(BOT_TOKEN)
 
@@ -16,7 +16,7 @@ def send_welcome(message):
         f"أهلاً بك يا {user_name} في **بوت خريطة الكلية والمستجدين** 🎓✨\n\n"
         "هذا البوت صُمم ليكون دليلك الشامل لجميع أقسام الكلية (الهمك، التوسع، العلوم، والأداب) "
         "لتسهيل الوصول للقاعات والمخابر عبر خريطة تفاعلية.\n\n"
-        "💡 **تم إعداد وتطوير البوت بواسطة:** [@YourUsername]\n\n"
+        "💡 **تم إعداد وتطوير البوت بواسطة:** [@Y0USSEF_SABRA]\n\n"
         "اضغط على الزر أدناه لفتح الخريطة التفاعلية مباشرةً 👇"
     )
 
