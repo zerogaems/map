@@ -136,13 +136,11 @@
 </head>
 <body>
 
-  <!-- شريط التنقل العلوي -->
   <div class="top-nav">
     <button id="btn-outdoor" class="nav-btn active" onclick="switchView('outdoor')">الخارجية (الجامعة)</button>
     <button id="btn-indoor" class="nav-btn" onclick="switchView('indoor')">الداخلية (الكلية)</button>
   </div>
 
-  <!-- الخريطة الخارجية -->
   <div id="outdoor-container" class="map-container">
     <div id="outdoor-map"></div>
     <div class="controls-panel">
@@ -155,11 +153,10 @@
           <option value="uloom">4. كلية العلوم</option>
         </select>
       </div>
-      <button class="action-btn" onclick="locateUser()">📍 حدد موقعي وارسم المسار</button>
+      <button class="action-btn" id="btn-locate" onclick="locateUser()">📍 حدد موقعي وارسم المسار</button>
     </div>
   </div>
 
-  <!-- المخطط الداخلي والتنقل بين المباني والقاعات -->
   <div id="indoor-container" class="map-container" style="display: none;">
     <canvas id="indoor-canvas"></canvas>
     
@@ -173,7 +170,6 @@
         </select>
 
         <select id="room-select">
-          <!-- يتحدث أوتوماتيكياً -->
         </select>
       </div>
 
@@ -186,65 +182,46 @@
     tg.ready();
     tg.expand();
 
+    // دالة لتنبيه المستخدم بواجهات التلغرام الأصلية بدون عنوان النطاق
+    function notify(message) {
+      if (tg && tg.showAlert) {
+        tg.showAlert(message);
+      } else {
+        alert(message);
+      }
+    }
+
     let map;
     let userMarker;
     let buildingMarkers = {};
     let routeLine;
     let isIndoorActive = false;
 
-    // حدود مستطيل الكليات الأربع (حظر الخروج عن الحرم)
     const southWest = L.latLng(35.51958875818877, 35.80444387688746);
     const northEast = L.latLng(35.52780824158785, 35.81065192458042);
     const campusBounds = L.latLngBounds(southWest, northEast);
 
-    // إحداثيات المدخل الرئيسي والمباني الأربعة
     const campusData = {
-      main: {
-        name: "المدخل الرئيسي للجامعة",
-        lat: 35.52601940733772,
-        lng: 35.806881711117235
-      },
-      hamak: {
-        name: "كلية الهمك",
-        lat: 35.524735104049554,
-        lng: 35.80832173303512,
-        rooms: ["21م", "22م", "23م", "21ك", "22ك", "23ك", "44ك"]
-      },
-      twasaa: {
-        name: "مبنى التوسع",
-        lat: 35.52309984997797,
-        lng: 35.809953816186045,
-        rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"]
-      },
-      adab: {
-        name: "كلية الآداب",
-        lat: 35.52142722934893,
-        lng: 35.808531572615784,
-        rooms: ["مدرج 1", "مدرج 2", "ق1", "ق2"]
-      },
-      uloom: {
-        name: "كلية العلوم",
-        lat: 35.523082390509956,
-        lng: 35.805570862320266,
-        rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"]
-      }
+      main: { name: "المدخل الرئيسي للجامعة", lat: 35.52601940733772, lng: 35.806881711117235 },
+      hamak: { name: "كلية الهمك", lat: 35.524735104049554, lng: 35.80832173303512, rooms: ["21م", "22م", "23م", "21ك", "22ك", "23ك", "44ك"] },
+      twasaa: { name: "مبنى التوسع", lat: 35.52309984997797, lng: 35.809953816186045, rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"] },
+      adab: { name: "كلية الآداب", lat: 35.52142722934893, lng: 35.808531572615784, rooms: ["مدرج 1", "مدرج 2", "ق1", "ق2"] },
+      uloom: { name: "كلية العلوم", lat: 35.523082390509956, lng: 35.805570862320266, rooms: ["مدرج 1", "مدرج 2", "مدرج 3", "مدرج 4"] }
     };
 
     function initOutdoorMap() {
-      // إعداد الخريطة مع حظر الحدود وتقييد الزوم لمنع اللاغ
       map = L.map('outdoor-map', {
         maxBounds: campusBounds,
-        maxBoundsViscosity: 1.0, // جدار مرن لمنع السحب خارج الحرم
-        minZoom: 15,
+        maxBoundsViscosity: 0.5,
+        minZoom: 16,
         maxZoom: 19
-      }).setView([campusData.main.lat, campusData.main.lng], 16);
+      }).setView([campusData.main.lat, campusData.main.lng], 17);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      // تثبيت دبابيس المباني
       Object.keys(campusData).forEach(key => {
         const item = campusData[key];
         const marker = L.marker([item.lat, item.lng]).addTo(map)
@@ -256,49 +233,59 @@
     }
 
     function locateUser() {
+      const btn = document.getElementById('btn-locate');
+      btn.innerText = "⏳ جاري تحديد الموقع...";
+
       if (!navigator.geolocation) {
-        alert("خدمة الـ GPS غير مدعومة في جهازك.");
+        notify("خدمة الـ GPS غير مدعومة في متصفحك.");
+        btn.innerText = "📍 حدد موقعي وارسم المسار";
         return;
       }
 
-      // إعدادات محسّنة لمنع التعليق
       const geoOptions = {
-        timeout: 5000,
-        maximumAge: 30000,
-        enableHighAccuracy: true
+        timeout: 15000,
+        maximumAge: 60000,
+        enableHighAccuracy: false
       };
 
-      navigator.geolocation.getCurrentPosition(position => {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        const userLatLng = L.latLng(userLat, userLng);
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          btn.innerText = "📍 حدد موقعي وارسم المسار";
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          const userLatLng = L.latLng(userLat, userLng);
 
-        // 1. فحص هل الطالب داخل حدود الكليات؟
-        if (!campusBounds.contains(userLatLng)) {
-          alert("أنت حالياً خارج نطاق الحرم الجامعي! يمكنك استكشاف الخريطة والتنقل بين الكليات يدوياً.");
-          return;
-        }
+          if (!campusBounds.contains(userLatLng)) {
+            notify("أنت حالياً خارج نطاق الحرم الجامعي! يمكنك استكشاف الخريطة والتنقل بين الكليات يدوياً.");
+            return;
+          }
 
-        // 2. إذا كان داخل الحرم: وضع الدبوس ورسم المسار
-        if (userMarker) map.removeLayer(userMarker);
-        userMarker = L.marker([userLat, userLng]).addTo(map)
-          .bindPopup('موقعك الحالي 📍').openPopup();
+          if (userMarker) map.removeLayer(userMarker);
+          userMarker = L.marker([userLat, userLng]).addTo(map)
+            .bindPopup('موقعك الحالي 📍').openPopup();
 
-        const selectedBuildingKey = document.getElementById('building-select-outdoor').value;
-        
-        if (selectedBuildingKey && campusData[selectedBuildingKey]) {
-          const target = campusData[selectedBuildingKey];
-          drawRouteLine([userLat, userLng], [target.lat, target.lng]);
+          const selectedBuildingKey = document.getElementById('building-select-outdoor').value;
+          
+          if (selectedBuildingKey && campusData[selectedBuildingKey]) {
+            const target = campusData[selectedBuildingKey];
+            drawRouteLine([userLat, userLng], [target.lat, target.lng]);
 
-          const fitBounds = L.latLngBounds([[userLat, userLng], [target.lat, target.lng]]);
-          map.fitBounds(fitBounds, { padding: [40, 40] });
-        } else {
-          map.setView([userLat, userLng], 18);
-        }
-
-      }, () => {
-        alert("تعذر تحديد الموقع، يرجى تفعيل الـ GPS في هاتفك.");
-      }, geoOptions);
+            const fitBounds = L.latLngBounds([[userLat, userLng], [target.lat, target.lng]]);
+            map.fitBounds(fitBounds, { padding: [40, 40] });
+          } else {
+            map.setView([userLat, userLng], 18);
+          }
+        },
+        error => {
+          btn.innerText = "📍 حدد موقعي وارسم المسار";
+          let errorMsg = "تعذر تحديد الموقع.";
+          if (error.code === 1) errorMsg = "يرجى منح صلاحية الموقع للتطبيق في إعدادات الهاتف.";
+          else if (error.code === 2) errorMsg = "إشارة الـ GPS ضعيفة حالياً، يرجى المحاولة في مكان مكشوف.";
+          else if (error.code === 3) errorMsg = "استغرق تحديد الموقع وقتاً طويلاً، حاول مرة أخرى.";
+          notify(errorMsg);
+        },
+        geoOptions
+      );
     }
 
     function focusBuildingOnMap(key) {
@@ -319,11 +306,8 @@
       }
     }
 
-    // رسم مسار نظيف مع مسح الخطوط القديمة لمنع استنزاف الذاكرة
     function drawRouteLine(fromLatLng, toLatLng) {
-      if (routeLine) {
-        map.removeLayer(routeLine);
-      }
+      if (routeLine) map.removeLayer(routeLine);
 
       routeLine = L.polyline([fromLatLng, toLatLng], {
         color: '#2481cc',
@@ -413,7 +397,7 @@
     function startNavigation() {
       const room = document.getElementById('room-select').value;
       const buildingName = campusData[document.getElementById('building-select-indoor').value].name;
-      alert(`جاري توجيهك إلى [${room}] في [${buildingName}]`);
+      notify(`جاري توجيهك إلى [${room}] في [${buildingName}]`);
     }
 
     window.onload = function() {
