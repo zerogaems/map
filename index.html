@@ -13,7 +13,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    /* تنسيقات أساسية تستخدم ألوان تلغرام تلقائياً */
     :root {
       --bg-color: var(--tg-theme-bg-color, #ffffff);
       --text-color: var(--tg-theme-text-color, #222222);
@@ -38,7 +37,6 @@
       overflow: hidden;
     }
 
-    /* شريط التنقل العلوي */
     .top-nav {
       display: flex;
       background-color: var(--secondary-bg);
@@ -66,7 +64,6 @@
       color: var(--button-text);
     }
 
-    /* حاويات الخرائط */
     .map-container {
       flex: 1;
       width: 100%;
@@ -82,7 +79,7 @@
     #indoor-map {
       width: 100%;
       height: 100%;
-      display: none; /* مخفي بالبداية */
+      display: none;
       background-color: #1e1e24;
       display: flex;
       flex-direction: column;
@@ -91,7 +88,6 @@
       position: relative;
     }
 
-    /* لوحة التوجيه والتحكم السفلية */
     .controls-panel {
       position: absolute;
       bottom: 15px;
@@ -126,7 +122,6 @@
       cursor: pointer;
     }
 
-    /* مكان تحريك الشخصية التفاعلية */
     #indoor-canvas {
       width: 100%;
       height: 100%;
@@ -136,13 +131,11 @@
 </head>
 <body>
 
-  <!-- شريط التبديل بين الخريطة الخارجية والداخلية -->
   <div class="top-nav">
     <button id="btn-outdoor" class="nav-btn active" onclick="switchView('outdoor')">الخارجية (الجامعة)</button>
     <button id="btn-indoor" class="nav-btn" onclick="switchView('indoor')">الداخلية (الكلية)</button>
   </div>
 
-  <!-- 1. عرض الخريطة الخارجية (Leaflet) -->
   <div id="outdoor-container" class="map-container">
     <div id="outdoor-map"></div>
     <div class="controls-panel">
@@ -150,7 +143,6 @@
     </div>
   </div>
 
-  <!-- 2. عرض المخطط الداخلي (Canvas لشخصية 2D) -->
   <div id="indoor-container" class="map-container" style="display: none;">
     <canvas id="indoor-canvas"></canvas>
     
@@ -166,35 +158,32 @@
   </div>
 
   <script>
-    // 1. تهيئة تطبيق تلغرام
     const tg = window.Telegram.WebApp;
     tg.ready();
-    tg.expand(); // ملء الشاشة بالكامل داخل تلغرام
+    tg.expand();
 
     let map;
     let userMarker;
 
-    // 2. تشغيل خريطة Leaflet الخارجية
+    // الإحداثيات الخاصة بمدخل الكلية
+    const collegeLat = 35.52601940733772; 
+    const collegeLng = 35.806881711117235;
+
     function initOutdoorMap() {
-      // إحداثيات افتراضية (يمكنك تغييرها لإحداثيات باب الكلية أو الجامعة)
-      const defaultLat = 33.5138; 
-      const defaultLng = 36.2765;
+      // التمركز حول الكلية بمستوى زوم دقيق (17)
+      map = L.map('outdoor-map').setView([collegeLat, collegeLng], 17);
 
-      map = L.map('outdoor-map').setView([defaultLat, defaultLng], 16);
-
-      // تحميل بلاطات الخريطة من OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      // إضافة دبوس لمدخل الكلية
-      L.marker([defaultLat, defaultLng]).addTo(map)
-        .bindPopup('<b>مدخل الكلية الرئيسي</b>')
+      // وضع دبوس في الموقع المكتشف
+      L.marker([collegeLat, collegeLng]).addTo(map)
+        .bindPopup('<b>موقع الكلية الرئيسي 🏫</b>')
         .openPopup();
     }
 
-    // تحديد موقع الطالب بالـ GPS
     function locateUser() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
@@ -204,7 +193,7 @@
           if (userMarker) map.removeLayer(userMarker);
 
           userMarker = L.marker([lat, lng]).addTo(map)
-            .bindPopup('موقعك الحالي').openPopup();
+            .bindPopup('موقعك الحالي 📍').openPopup();
 
           map.setView([lat, lng], 18);
         }, () => {
@@ -213,7 +202,6 @@
       }
     }
 
-    // 3. التبديل بين الخريطة الخارجية والداخلية
     function switchView(view) {
       const outdoorContainer = document.getElementById('outdoor-container');
       const indoorContainer = document.getElementById('indoor-container');
@@ -225,42 +213,36 @@
         indoorContainer.style.display = 'none';
         btnOutdoor.classList.add('active');
         btnIndoor.classList.remove('active');
-        setTimeout(() => map.invalidateSize(), 200); // إعادة ضبط حجم الخريطة
+        setTimeout(() => map.invalidateSize(), 200);
       } else {
         outdoorContainer.style.display = 'none';
         indoorContainer.style.display = 'block';
         btnIndoor.classList.add('active');
         btnOutdoor.classList.remove('active');
-        drawIndoorMap(); // رسم المخطط الداخلي
+        drawIndoorMap();
       }
     }
 
-    // 4. رسم المخطط الداخلي المبدئي على Canvas
     function drawIndoorMap() {
       const canvas = document.getElementById('indoor-canvas');
       const ctx = canvas.getContext('2d');
 
-      // ضبط أبعاد الـ Canvas
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
 
-      // خلفية المخطط
       ctx.fillStyle = '#eef2f5';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // رسم ممر بسيط تجريبي
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 4;
       ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 150);
 
-      // نص توضيحي في المنتصف
       ctx.fillStyle = '#666';
       ctx.font = '16px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('مخطط الكلية الداخلي (سيتم وضع رسم الطبقات هنا)', canvas.width / 2, canvas.height / 2);
     }
 
-    // تشغيل الخريطة عند تحميل الصفحة
     window.onload = function() {
       initOutdoorMap();
     };
